@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate'
 
+
+// for filtering
 const LithuaniaArea = 365;
 const Region = "Oceania"
-export interface Country {
+
+
+//interfaces
+ interface Country {
 name : string,
 region: string,
 area: number,
 independent : boolean
 }
-export interface Countries {
+
+ interface Countries {
   countries : Country[]
 }
-export interface PaginatedCountries {
+
+ interface PaginatedCountries {
   items : Country[],
   itemsPerPage : number
 }
+
+
+
 
 
 function countryTemplate(data : Country) {
@@ -39,8 +48,8 @@ function countryTemplate(data : Country) {
 function App() {
  
 
-  const[countries, setCountries] = useState<Country[]>([])
-  const[countriesDisplay, setCountriesToBeDisplayed] = useState<Country[]>([])
+  const[countries, setCountries] = useState<Country[]>([])  // initial data
+  const[countriesDisplay, setCountriesToBeDisplayed] = useState<Country[]>([])  // data after filtering
 
   const getData = async () =>{
     const res   = await axios.get('https://restcountries.com/v2/all?fields=name,region,area');
@@ -56,8 +65,9 @@ function App() {
   }
  
 
+
+
   const itemsContainer = document.querySelector(".items-container");
- 
   const all = document.querySelector(".allCountries");
   const ascButton = document.querySelector(".ascendingButton")
   const descButton = document.querySelector(".descendingButton")
@@ -65,7 +75,7 @@ function App() {
   const regionButton = document.querySelector(".oceaniaRegion")
   
   const handleAllCountries = () =>{
-    console.log(countries)
+   
     setCountriesToBeDisplayed(countries)
     renderProjectsToDom(countriesDisplay)
   }
@@ -89,10 +99,6 @@ function App() {
     renderProjectsToDom(countriesDisplay)
   }
 
-  
- 
-  
-   //window.addEventListener("DOMContentLoaded", handleInitialLoad);
    if (ascButton!== null){
    ascButton.addEventListener("click", handleAscClick);
    }
@@ -125,27 +131,6 @@ function App() {
   }
 
   
-
-  //const[countriesJSON, setCountriesJSON] = useState("")
-
-  
-  // const render = () =>{
-  // useEffect(() => {
-  //   const getData = async () =>{
-  //   const res   = await axios.get('https://restcountries.com/v2/all?fields=name,region,area');
-  //   const data = res.data
-  //   let dataArr : Country[] = [];
-  //   for (var i = 0; i < data.length; i++){
-  //     dataArr.push(data[i]);
-  //   }
-  //   setCountries(dataArr)
-   
-  //   }
-  //   getData();
-    
-  //   },
-  // []);
-  // }
  function compareAsc (a: Country, b: Country){
  
    if (a.name > b.name){
@@ -189,20 +174,15 @@ const filterCountriesDescending = () =>{
   
 }
 
-
-
-
-
-//handleInitialLoad()
 window.addEventListener("DOMContentLoaded", handleInitialLoad);
   return (
     <div className="App">
     
     <div className='head'>
       <div className='main'>
-        <h2>
+        <h1>
           HIRE ME!
-        </h2>
+        </h1>
     </div>
     <div className='filters'>
     <span className='sortButtons'>
@@ -217,8 +197,8 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
       </span>
 
       <div className="dropdown">
-      <button className='dropdown-header btn'>Filters</button>
-      <div className="dropdown-content">
+      <button className='dropdownHeader btn'>Filters</button>
+      <div className="dropdownContent">
         <button className='allCountries'>All countries</button>
         <button className='smallerThan'>Smaller than Lithuania</button>
         <button className='oceaniaRegion'>Oceania region</button>
@@ -230,38 +210,9 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
 
 
      </div>
-     {/* <PaginatedItems items={countriesDisplay}
-     itemsPerPage={50}/> */}
+     <PaginatedItems items={countriesDisplay}
+     itemsPerPage={25}/>
    
-     <CountryList countries = {countriesDisplay}/>
-
-{/* 
-     <div className='alignCenter'>
-        <div className='countriesContainer'>
-            <div className='items-container'> 
-
-            </div>
-
-        </div> 
-      
-    
-    </div> */}
-   
-    {/* <div className='alignCenter'>
-        <div className='countriesContainer'>
-     
-      
-        {countries.map((country : Country, inx : number)=>(
-          <div className='country'>
-            <p className='countryProp'>Country name : {country.name}</p>
-            <p className='countryProp'>Country region : {country.region}</p>
-            <p className='countryProp'>Country area : {country.area}</p>
-      
-          </div>
-        ))}   
-          
-        </div>
-        </div> */}
       
     </div>
 
@@ -293,15 +244,13 @@ return(
  }
 
 const PaginatedItems :React.FC<PaginatedCountries>  = ({items, itemsPerPage}) => {
-  // We start with an empty list of items.
+ 
   const [currentItems, setCurrentItems] = useState<Country[]>([]);
   const [pageCount, setPageCount] = useState(0);
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
   const [itemOffset, setItemOffset] = useState(0);
-  const backupItems = items.slice(0, 50);
+  
   useEffect(() => {
-    // Fetch items from another resources.
+    
     const endOffset = itemOffset + itemsPerPage;
    
     console.log(`Loading items from ${itemOffset} to ${endOffset}`);
@@ -311,7 +260,7 @@ const PaginatedItems :React.FC<PaginatedCountries>  = ({items, itemsPerPage}) =>
     setPageCount(Math.ceil(items.length / itemsPerPage));
   }, [itemOffset, itemsPerPage, items]);
 
-  // Invoke when user click to request another page.
+  
   const handlePageClick = (event : any) => {
     const newOffset = (event.selected * itemsPerPage) % items.length;
     console.log(
@@ -320,21 +269,20 @@ const PaginatedItems :React.FC<PaginatedCountries>  = ({items, itemsPerPage}) =>
     setItemOffset(newOffset);
   };
   
- 
-  
 
   return (
     <>
-    {/* {currentItems.length === 0 ? <CountryList countries={backupItems} /> : <CountryList countries={currentItems} />} */}
+   
        <CountryList countries={currentItems} /> 
       <ReactPaginate
         breakLabel="..."
-        nextLabel="next >"
+        nextLabel=">"
         onPageChange={handlePageClick}
         pageRangeDisplayed={5}
         pageCount={pageCount}
-        previousLabel="< previous"
-        // renderOnZeroPageCount={null}
+        previousLabel="<"
+        activeClassName="active"
+       
       />
     </>
   );
