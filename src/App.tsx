@@ -201,7 +201,7 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
       <div className="dropdownContent">
         <button className='allCountries'>All countries</button>
         <button className='smallerThan'>Smaller than Lithuania</button>
-        <button className='oceaniaRegion'>Oceania region</button>
+        <button className='oceaniaRegion'>Oceania region</button> 
        
 </div>
 
@@ -212,6 +212,8 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
      </div>
      <PaginatedItems items={countriesDisplay}
      itemsPerPage={25}/>
+
+     {/* <CountryList countries={countriesDisplay} /> */}   
    
       
     </div>
