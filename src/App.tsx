@@ -5,7 +5,7 @@ import ReactPaginate from 'react-paginate'
 
 
 // for filtering
-const LithuaniaArea = 365;
+const LithuaniaArea = 65300;
 const Region = "Oceania"
 
 
