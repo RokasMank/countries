@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate'
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 
 // for filtering
 const LithuaniaArea = 65300;
 const Region = "Oceania"
-
 
 //interfaces
  interface Country {
@@ -27,9 +27,6 @@ independent : boolean
 }
 
 
-
-
-
 function countryTemplate(data : Country) {
   const { name, region, area, independent } = data;
   return `
@@ -44,13 +41,30 @@ function countryTemplate(data : Country) {
   `;
 }
 
+const CountriesDisplay =(countries : Country[])=>{
+  return(
+    <div>
+      {countries.map((c: Country, key : number)=>{
+          <div className='items-container' key={key}>
+          <p className='countryProp'>Country name : ${c.name}</p>
+          <p className='countryProp'>Country region : ${c.region}</p>
+          <p className='countryProp'>Country area : ${c.area}</p>
+        </div>
+      })}
+  
+
+    </div>
+  )
+}
+
 
 function App() {
  
 
   const[countries, setCountries] = useState<Country[]>([])  // initial data
   const[countriesDisplay, setCountriesToBeDisplayed] = useState<Country[]>([])  // data after filtering
-
+  const [test, setTest] = useState("none")
+ const [initialCountries, setInitialCountries] = useState<Country[]>([])
   const getData = async () =>{
     const res   = await axios.get('https://restcountries.com/v2/all?fields=name,region,area');
     const data = res.data
@@ -60,77 +74,28 @@ function App() {
     }
   
     setCountries(dataArr)
-    setCountriesToBeDisplayed(dataArr)
+    setInitialCountries(dataArr)
    return dataArr
   }
+  useEffect(() => {
+    getData();
+     
+  },[]);
+
+ 
  
 
-
-
-  const itemsContainer = document.querySelector(".items-container");
-  const all = document.querySelector(".allCountries");
-  const ascButton = document.querySelector(".ascendingButton")
-  const descButton = document.querySelector(".descendingButton")
-  const smallerButton = document.querySelector(".smallerThan")
-  const regionButton = document.querySelector(".oceaniaRegion")
-  
-  const handleAllCountries = () =>{
-   
-    setCountriesToBeDisplayed(countries)
-    renderProjectsToDom(countriesDisplay)
+  const sortCountriesAscending = () =>{
+    setCountries(countries.sort(compareAsc));
+    setTest("asc")   // why did it helped??????
+    console.log(countries)
   }
-  const handleAscClick = ()  =>{
-    filterCountriesAscending()
-    renderProjectsToDom(countriesDisplay)
-  }
-
-  
-  const handleDescClick = ()  =>{
-    filterCountriesDescending()
-    renderProjectsToDom(countriesDisplay)
-  }
-
-  const handleSmallerFilter = () =>{
-    filterCountriesSmallerThan(LithuaniaArea)
-    renderProjectsToDom(countriesDisplay)
-  }
-  const handleRegionFilter = () =>{
-    filterRegion(Region)
-    renderProjectsToDom(countriesDisplay)
-  }
-
-   if (ascButton!== null){
-   ascButton.addEventListener("click", handleAscClick);
-   }
-   if (descButton!== null){
-    descButton.addEventListener("click", handleDescClick);
-    }
-    
-    if (all !== null){
-      all.addEventListener("click", handleAllCountries)
-    }
-
-   if (smallerButton !== null){
-    smallerButton.addEventListener("click", handleSmallerFilter);
-   }
-   if (regionButton !== null){
-    regionButton.addEventListener("click", handleRegionFilter)
-   }
-
-  async function handleInitialLoad() {
-    const data = await getData();
-    renderProjectsToDom(data);
-  }
-  
-  
-  function renderProjectsToDom(data :Country[]) {
-    let items = data.map((item) => countryTemplate(item)).join("");
-    if (itemsContainer !== null){
-    itemsContainer.innerHTML = items;}
+  const sortCountriesDescending = () =>{
+    setCountries(countries.sort(compareDesc))
+    setTest("desc")
+    console.log(countries)
    
   }
-
-  
  function compareAsc (a: Country, b: Country){
  
    if (a.name > b.name){
@@ -155,26 +120,14 @@ function App() {
 
 const filterCountriesSmallerThan = (x : number) =>{
     const data : Country[] = countries.filter(c => c.area < x);
-    setCountriesToBeDisplayed(data);
+    setCountries(data);
 }
 
 const filterRegion = (r : string) =>{
   const data : Country[] = countries.filter(c => c.region === r);
-    setCountriesToBeDisplayed(data);
+    setCountries(data);
 }
 
-const filterCountriesAscending = () =>{
-  var c = countriesDisplay.sort(compareAsc)
-  setCountriesToBeDisplayed(c);
-  
-}
-const filterCountriesDescending = () =>{
-  var c = countriesDisplay.sort(compareDesc)
-  setCountriesToBeDisplayed(c);
-  
-}
-
-window.addEventListener("DOMContentLoaded", handleInitialLoad);
   return (
     <div className="App">
     
@@ -184,12 +137,13 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
           HIRE ME!
         </h1>
     </div>
+
     <div className='filters'>
     <span className='sortButtons'>
-        <button  className="ascendingButton btn">
+        <button  className="ascendingButton btn" onClick={()=>sortCountriesAscending()}>
           Ascending by name
         </button>
-        <button className="descendingButton btn">
+        <button className="descendingButton btn" onClick={()=>sortCountriesDescending()}>
           Descending by name
          
         </button>
@@ -199,9 +153,9 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
       <div className="dropdown">
       <button className='dropdownHeader btn'>Filters</button>
       <div className="dropdownContent">
-        <button className='allCountries'>All countries</button>
-        <button className='smallerThan'>Smaller than Lithuania</button>
-        <button className='oceaniaRegion'>Oceania region</button> 
+        <button onClick={()=>setCountries(initialCountries)} className='allCountries'>All countries</button>
+        <button onClick={()=>filterCountriesSmallerThan(LithuaniaArea)} className='smallerThan'>Smaller than Lithuania</button>
+        <button onClick={()=>filterRegion("Oceania")}className='oceaniaRegion'>Oceania region</button> 
        
 </div>
 
@@ -210,12 +164,11 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
 
 
      </div>
-     <PaginatedItems items={countriesDisplay}
-     itemsPerPage={25}/>
+     {/* <PaginatedItems items={countriesDisplay}
+     itemsPerPage={25}/> */}
 
-     {/* <CountryList countries={countriesDisplay} /> */}   
-   
-      
+     <CountryList countries={countries} />   
+        
     </div>
 
     
@@ -224,7 +177,7 @@ window.addEventListener("DOMContentLoaded", handleInitialLoad);
 
 
 const CountryList : React.FC<Countries> = ({countries}) =>{
-
+  
 return(
         <div className='alignCenter'>
         <div className='countriesContainer'>
@@ -289,6 +242,5 @@ const PaginatedItems :React.FC<PaginatedCountries>  = ({items, itemsPerPage}) =>
     </>
   );
 }
-
 
 export default App;
